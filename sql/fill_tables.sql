@@ -1,71 +1,59 @@
--- Set params
-set session my.number_of_sales = '2000000';
-set session my.number_of_users = '500000';
-set session my.number_of_products = '300';
-set session my.number_of_stores = '500';
-set session my.number_of_coutries = '100';
-set session my.number_of_cities = '30';
-set session my.status_names = '5';
-set session my.start_date = '2019-01-01 00:00:00';
-set session my.end_date = '2020-02-01 00:00:00';
+INSERT INTO
+    users (user_id, name, phone_number)
+VALUES
+    (
+        '2897d37b-0dcf-42bf-9e9d-71b8610f5180',
+        'Ali',
+        '+96171236834'
+    ),
+    (
+        '8e529e51-8b0d-499b-8f46-21f7e85a0159',
+        'Hasan',
+        '+96170149293'
+    ),
+    (
+        '16f289eb-bdb5-4617-a9bb-c6cdb54aa29b',
+        'Nesma',
+        '+96171505659'
+    );
 
--- load the pgcrypto extension to gen_random_uuid ()
-CREATE EXTENSION pgcrypto;
+INSERT INTO
+    roles (role_id, name)
+VALUES
+    ('1234', 'admin'),
+    ('3333', 'supervisor'),
+    ('5051', 'doorkeeper');
 
--- Filling of products
-INSERT INTO product
-select id, concat('Product ', id)
-FROM GENERATE_SERIES(1, current_setting('my.number_of_products')::int) as id;
+INSERT INTO
+    permissions (permission_id, action, resource)
+VALUES
+    ('001', 'create', 'event'),
+    ('002', 'get-one', 'event'),
+    ('003', 'update', 'event'),
+    ('004', 'get-all', 'event'),
+    ('005', 'create', 'user'),
+    ('006', 'get-one', 'user'),
+    ('007', 'update', 'user'),
+    ('008', 'get-all', 'user');
 
--- Filling of countries
-INSERT INTO country
-select id, concat('Country ', id)
-FROM GENERATE_SERIES(1, current_setting('my.number_of_coutries')::int) as id;
+INSERT INTO
+    users_roles (user_id, role_id)
+VALUES
+    ('2897d37b-0dcf-42bf-9e9d-71b8610f5180', '5051'),
+    ('8e529e51-8b0d-499b-8f46-21f7e85a0159', '5051'),
+    ('8e529e51-8b0d-499b-8f46-21f7e85a0159', '3333'),
+    ('16f289eb-bdb5-4617-a9bb-c6cdb54aa29b', '1234');
 
--- Filling of cities
-INSERT INTO city
-select id
-	, concat('City ', id)
-	, floor(random() * (current_setting('my.number_of_coutries')::int) + 1)::int
-FROM GENERATE_SERIES(1, current_setting('my.number_of_cities')::int) as id;
-
--- Filling of stores
-INSERT INTO store
-select id
-	, concat('Store ', id)
-	, floor(random() * (current_setting('my.number_of_cities')::int) + 1)::int
-FROM GENERATE_SERIES(1, current_setting('my.number_of_stores')::int) as id;
-
--- Filling of users
-INSERT INTO users
-select id
-	, concat('User ', id)
-FROM GENERATE_SERIES(1, current_setting('my.number_of_users')::int) as id;
-
--- Filling of users
-INSERT INTO status_name
-select status_name_id
-	, concat('Status Name ', status_name_id)
-FROM GENERATE_SERIES(1, current_setting('my.status_names')::int) as status_name_id;
-
--- Filling of sales
-INSERT INTO sale
-select gen_random_uuid ()
-	, round(CAST(float8 (random() * 10000) as numeric), 3)
-	, TO_TIMESTAMP(start_date, 'YYYY-MM-DD HH24:MI:SS') +
-		random()* (TO_TIMESTAMP(end_date, 'YYYY-MM-DD HH24:MI:SS')
-							- TO_TIMESTAMP(start_date, 'YYYY-MM-DD HH24:MI:SS'))
-	, floor(random() * (current_setting('my.number_of_products')::int) + 1)::int
-	, floor(random() * (current_setting('my.number_of_users')::int) + 1)::int
-	, floor(random() * (current_setting('my.number_of_stores')::int) + 1)::int
-FROM GENERATE_SERIES(1, current_setting('my.number_of_sales')::int) as id
-	, current_setting('my.start_date') as start_date
-	, current_setting('my.end_date') as end_date;
-
--- Filling of order_status
-INSERT INTO order_status
-select gen_random_uuid ()
-	, date_sale + random()* (date_sale + '5 days' - date_sale)
-	, sale_id
-	, floor(random() * (current_setting('my.status_names')::int) + 1)::int
-from sale;
+INSERT INTO
+    roles_permissions (permission_id, role_id)
+VALUES
+    ('001', '1234'),
+    ('002', '1234'),
+    ('003', '1234'),
+    ('004', '1234'),
+    ('007', '1234'),
+    ('008', '1234'),
+    ('005', '3333'),
+    ('006', '3333'),
+    ('003', '5051'),
+    ('002', '5051');
